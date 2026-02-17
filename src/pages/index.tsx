@@ -12,7 +12,7 @@ import {
     Title,
     Tooltip,
 } from 'chart.js';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -29,11 +29,12 @@ export default function Home() {
   const [sortOrder, setSortOrder] = useState<'size' | 'recent'>('size');
   const [expandedClusters, setExpandedClusters] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    loadClusters();
+  const showToast = useCallback((message: string, type: ToastMessage['type']) => {
+    const id = generateId();
+    setToasts((prev) => [...prev.filter((t) => t.type !== type), { id, message, type }]);
   }, []);
 
-  const loadClusters = async () => {
+  const loadClusters = useCallback(async () => {
     try {
       const data: ClusterResponse = await api.getClusters();
       setClusters(data.clusters);
@@ -46,7 +47,11 @@ export default function Home() {
       console.error('Error loading clusters:', error);
       showToast('Failed to load clusters', 'error');
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    loadClusters();
+  }, [loadClusters]);
 
   const submitComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,11 +75,6 @@ export default function Home() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const showToast = (message: string, type: ToastMessage['type']) => {
-    const id = generateId();
-    setToasts((prev) => [...prev.filter((t) => t.type !== type), { id, message, type }]);
   };
 
   const removeToast = (id: string) => {

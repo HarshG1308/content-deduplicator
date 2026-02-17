@@ -95,10 +95,10 @@ export default function HowItWorks() {
                     Enhanced Similarity Calculation
                   </h3>
                   <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-3">
-                    The system uses an advanced dual-comparison approach: first comparing the new comment's embedding
+                    The system uses an advanced dual-comparison approach: first comparing the new comment&apos;s embedding
                     with cluster centroids, then verifying against representative texts. This ensures accurate
                     clustering regardless of text length - whether you write one line or ten lines with the same
-                    meaning, they'll cluster together correctly.
+                    meaning, they&apos;ll cluster together correctly.
                   </p>
                   <div className="bg-slate-50 dark:bg-dark-bg border border-slate-200 dark:border-dark-border rounded-lg p-4">
                     <p className="text-sm text-slate-700 dark:text-slate-300 mb-2">
@@ -130,7 +130,7 @@ export default function HowItWorks() {
                   <ul className="list-disc list-inside space-y-2 mt-3 text-slate-600 dark:text-slate-400">
                     <li>
                       <strong>Existing Cluster:</strong> If a cluster with sufficient similarity exists, the comment is
-                      added to that cluster, and the cluster's centroid is updated.
+                      added to that cluster, and the cluster&apos;s centroid is updated.
                     </li>
                     <li>
                       <strong>New Cluster:</strong> If no similar cluster is found, a new cluster is created with this
@@ -152,7 +152,7 @@ export default function HowItWorks() {
                     Centroid Update & Optimization
                   </h3>
                   <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                    When a comment is added to an existing cluster, the cluster's centroid (average position) is
+                    When a comment is added to an existing cluster, the cluster&apos;s centroid (average position) is
                     recalculated to represent the center point of all comments in that cluster. This ensures that
                     future similarity comparisons are based on the collective meaning of the cluster.
                   </p>
