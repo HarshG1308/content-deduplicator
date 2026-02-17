@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Deduplicator - Professional Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        },
+                        dark: {
+                            bg: '#0f172a',
+                            card: '#1e293b',
+                            sidebar: '#1e293b',
+                            border: '#334155',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * { scroll-behavior: smooth; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        
+        .card-hover { 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .card-hover:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 12px 24px -4px rgba(99, 102, 241, 0.15); 
+        }
+        
+        .fade-in { 
+            animation: fadeIn 0.4s ease-in; 
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        
+        .toast { 
+            animation: slideUp 0.3s ease-out, slideDown 0.3s ease-in 4.7s; 
+        }
+        @keyframes slideUp { 
+            from { transform: translateY(10px); opacity: 0; } 
+            to { transform: translateY(0); opacity: 1; } 
+        }
+        @keyframes slideDown { 
+            from { transform: translateY(0); opacity: 1; } 
+            to { transform: translateY(10px); opacity: 0; } 
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        }
+        
+        .sidebar-gradient {
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body id="bodyRoot" class="bg-slate-50 dark:bg-dark-bg">
+    <div class="min-h-screen flex overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-72 sidebar-gradient dark:bg-dark-sidebar text-white flex flex-col shadow-xl h-screen sticky top-0 z-40">
+            <div class="px-6 py-8 border-b border-slate-700">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-layer-group text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight">Content Deduplicator</h1>
+                        <p class="text-xs text-slate-400">Professional Edition</p>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="flex-1 px-4 py-6 space-y-1">
+                <div class="mb-4">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 mb-2">Main Menu</p>
+                    <div class="py-3 px-4 rounded-lg bg-primary-500 bg-opacity-20 border border-primary-500 font-medium flex items-center gap-3 text-primary-300">
+                        <i class="fas fa-th-large w-5"></i>
+                        <span>Dashboard</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-1">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 mb-2 mt-6">Tools</p>
+                    <div class="py-2.5 px-4 rounded-lg hover:bg-slate-700 hover:bg-opacity-50 cursor-pointer transition flex items-center gap-3 text-slate-300 hover:text-white">
+                        <i class="fas fa-project-diagram w-5"></i>
+                        <span>Clusters</span>
+                    </div>
+                    <div class="py-2.5 px-4 rounded-lg hover:bg-slate-700 hover:bg-opacity-50 cursor-pointer transition flex items-center gap-3 text-slate-300 hover:text-white">
+                        <i class="fas fa-chart-line w-5"></i>
+                        <span>Analytics</span>
+                    </div>
+                    <div class="py-2.5 px-4 rounded-lg hover:bg-slate-700 hover:bg-opacity-50 cursor-pointer transition flex items-center gap-3 text-slate-300 hover:text-white">
+                        <i class="fas fa-upload w-5"></i>
+                        <span>Import Data</span>
+                    </div>
+                    <div class="py-2.5 px-4 rounded-lg hover:bg-slate-700 hover:bg-opacity-50 cursor-pointer transition flex items-center gap-3 text-slate-300 hover:text-white">
+                        <i class="fas fa-download w-5"></i>
+                        <span>Export Results</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-1">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 mb-2 mt-6">System</p>
+                    <div class="py-2.5 px-4 rounded-lg hover:bg-slate-700 hover:bg-opacity-50 cursor-pointer transition flex items-center gap-3 text-slate-300 hover:text-white">
+                        <i class="fas fa-cog w-5"></i>
+                        <span>Settings</span>
+                    </div>
+                    <div class="py-2.5 px-4 rounded-lg hover:bg-slate-700 hover:bg-opacity-50 cursor-pointer transition flex items-center gap-3 text-slate-300 hover:text-white">
+                        <i class="fas fa-question-circle w-5"></i>
+                        <span>Help</span>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="px-6 py-4 border-t border-slate-700">
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span class="text-xs text-slate-400">System Status</span>
+                </div>
+                <p class="text-sm font-semibold text-green-400">Active & Running</p>
+                <p class="text-xs text-slate-500 mt-3">&copy; 2026 Content Deduplicator</p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-w-0 overflow-x-hidden bg-slate-50 dark:bg-dark-bg">
+            <!-- Header -->
+            <header class="bg-white dark:bg-dark-card shadow-sm sticky top-0 z-30 border-b border-slate-200 dark:border-dark-border">
+                <div class="px-8 py-5 flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-100">Clustering Dashboard</h1>
+                        <p class="text-slate-500 dark:text-slate-400 text-sm mt-0.5">Real-time semantic analysis and content grouping</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="relative">
+                            <input type="text" id="searchClusters" placeholder="Search clusters..." 
+                                   class="pl-10 pr-4 py-2.5 w-64 border border-slate-300 dark:border-dark-border rounded-lg 
+                                          focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
+                                          bg-white dark:bg-dark-card text-slate-800 dark:text-slate-200
+                                          placeholder-slate-400 text-sm transition">
+                            <i class="fas fa-search absolute left-3 top-3.5 text-slate-400"></i>
+                        </div>
+                        <button id="darkModeToggle" 
+                                class="p-2.5 rounded-lg transition bg-slate-100 hover:bg-slate-200 
+                                       dark:bg-dark-border dark:hover:bg-slate-600 
+                                       text-slate-700 dark:text-slate-200">
+                            <i class="fas fa-moon dark:hidden"></i>
+                            <i class="fas fa-sun hidden dark:inline"></i>
+                        </button>
+                        <button class="p-2.5 rounded-lg transition bg-slate-100 hover:bg-slate-200 
+                                       dark:bg-dark-border dark:hover:bg-slate-600 
+                                       text-slate-700 dark:text-slate-200 relative">
+                            <i class="fas fa-bell"></i>
+                            <span class="absolute -top-1 -right-1 w-2 h-2 bg-primary-500 rounded-full"></span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="flex-1 p-8 overflow-y-auto">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-200 dark:border-dark-border p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Comments</p>
+                                <p class="text-3xl font-bold text-slate-800 dark:text-slate-100 mt-2" id="totalComments">0</p>
+                                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Processed</p>
+                            </div>
+                            <div class="w-14 h-14 bg-primary-100 dark:bg-primary-900 dark:bg-opacity-30 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-comments text-2xl text-primary-600 dark:text-primary-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-200 dark:border-dark-border p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Active Clusters</p>
+                                <p class="text-3xl font-bold text-slate-800 dark:text-slate-100 mt-2" id="totalClusters">0</p>
+                                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Identified</p>
+                            </div>
+                            <div class="w-14 h-14 bg-indigo-100 dark:bg-indigo-900 dark:bg-opacity-30 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-project-diagram text-2xl text-indigo-600 dark:text-indigo-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-200 dark:border-dark-border p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Average Size</p>
+                                <p class="text-3xl font-bold text-slate-800 dark:text-slate-100 mt-2" id="avgClusterSize">0</p>
+                                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Per cluster</p>
+                            </div>
+                            <div class="w-14 h-14 bg-emerald-100 dark:bg-emerald-900 dark:bg-opacity-30 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-chart-bar text-2xl text-emerald-600 dark:text-emerald-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                    <!-- Input Section -->
+                    <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-200 dark:border-dark-border p-6">
+                        <div class="mb-6">
+                            <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                                <i class="fas fa-plus-circle text-primary-500"></i>
+                                Add New Comment
+                            </h2>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Enter text to cluster semantically</p>
+                        </div>
+                        <form id="commentForm" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Comment Text</label>
+                                <textarea id="commentInput" 
+                                          placeholder="Enter your comment here..." 
+                                          required 
+                                          class="w-full px-4 py-3 border border-slate-300 dark:border-dark-border rounded-lg 
+                                                 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent 
+                                                 min-h-[140px] transition resize-none
+                                                 bg-white dark:bg-dark-bg text-slate-800 dark:text-slate-200
+                                                 placeholder-slate-400" 
+                                          maxlength="500"></textarea>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="text-xs text-slate-400">Maximum 500 characters</span>
+                                    <span class="text-xs font-medium text-slate-600 dark:text-slate-400">
+                                        <span id="charCount">0</span>/500
+                                    </span>
+                                </div>
+                            </div>
+                            <button type="submit" id="submitBtn" 
+                                    class="w-full btn-primary text-white font-semibold py-3 rounded-lg shadow-sm 
+                                           hover:shadow-md transition flex items-center justify-center gap-2">
+                                <i class="fas fa-paper-plane"></i>
+                                <span>Process Comment</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Chart Section -->
+                    <div class="lg:col-span-2 bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-200 dark:border-dark-border p-6">
+                        <div class="mb-6">
+                            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                                <i class="fas fa-chart-line text-primary-500"></i>
+                                Cluster Distribution
+                            </h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Visual representation of comment groupings</p>
+                        </div>
+                        <div class="relative h-64">
+                            <canvas id="clusterChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clusters Section -->
+                <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm border border-slate-200 dark:border-dark-border p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                                <i class="fas fa-layer-group text-primary-500"></i>
+                                Semantic Clusters
+                            </h2>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Comments grouped by similarity</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <select id="sortClusters" 
+                                    class="px-4 py-2 border border-slate-300 dark:border-dark-border rounded-lg 
+                                           focus:outline-none focus:ring-2 focus:ring-primary-500
+                                           bg-white dark:bg-dark-bg text-slate-700 dark:text-slate-200 text-sm">
+                                <option value="size">Sort by Size</option>
+                                <option value="recent">Sort by Recent</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="max-h-[600px] overflow-y-auto space-y-4" id="clustersContainer">
+                        <div class="text-center text-slate-400 dark:text-slate-500 py-16">
+                            <div class="w-16 h-16 bg-slate-100 dark:bg-dark-border rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-inbox text-3xl text-slate-300 dark:text-slate-600"></i>
+                            </div>
+                            <p class="text-base font-medium">No clusters yet</p>
+                            <p class="text-sm mt-1">Start adding comments to see semantic groupings</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-8 right-8 space-y-3 z-50"></div>
+
+    <script>
+        // Dark mode toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggle = document.getElementById('darkModeToggle');
+            const bodyRoot = document.getElementById('bodyRoot');
+            
+            // Check for saved theme preference or default to light mode
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                bodyRoot.classList.add('dark');
+            }
+            
+            toggle.addEventListener('click', function() {
+                bodyRoot.classList.toggle('dark');
+                const isDark = bodyRoot.classList.contains('dark');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            });
+        });
+
+        class AdvancedClusteringApp {
+            constructor() {
+                this.chart = null;
+                this.clusters = [];
+                this.initializeEventListeners();
+                this.loadClusters();
+                // Auto-refresh removed to prevent excessive popups
+            }
+
+            initializeEventListeners() {
+                document.getElementById('commentForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.submitComment();
+                });
+                document.getElementById('commentInput').addEventListener('input', (e) => {
+                    document.getElementById('charCount').textContent = e.target.value.length;
+                });
+                document.getElementById('searchClusters').addEventListener('input', (e) => {
+                    this.filterClusters(e.target.value);
+                });
+                document.getElementById('sortClusters').addEventListener('change', (e) => {
+                    this.sortClusters(e.target.value);
+                });
+            }
+
+            async submitComment() {
+                const submitBtn = document.getElementById('submitBtn');
+                const commentText = document.getElementById('commentInput').value.trim();
+
+                if (!commentText) {
+                    this.showToast('Please enter a comment', 'warning');
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Processing...</span>';
+
+                try {
+                    const response = await fetch('/api/comment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: commentText })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        this.showSuccessMessage(result);
+                        document.getElementById('commentForm').reset();
+                        document.getElementById('charCount').textContent = '0';
+                        this.loadClusters();
+                    } else {
+                        this.showToast('Error: ' + result.error, 'error');
+                    }
+                } catch (error) {
+                    this.showToast('Network error: ' + error.message, 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> <span>Process</span>';
+                }
+            }
+
+            showSuccessMessage(result) {
+                const message = result.is_new_cluster
+                    ? `Created new cluster!`
+                    : `Added with ${(result.similarity * 100).toFixed(0)}% similarity`;
+                this.showToast(message, 'success');
+            }
+
+            showToast(message, type = 'info') {
+                const container = document.getElementById('toastContainer');
+                // Clear existing toasts of the same type to prevent stacking
+                const existingToasts = container.querySelectorAll(`div[data-type="${type}"]`);
+                existingToasts.forEach(t => t.remove());
+                
+                const toast = document.createElement('div');
+                const colors = {
+                    success: 'bg-emerald-500 border-emerald-600',
+                    error: 'bg-rose-500 border-rose-600',
+                    warning: 'bg-amber-500 border-amber-600',
+                    info: 'bg-primary-500 border-primary-600'
+                };
+                const icons = {
+                    success: 'check-circle',
+                    error: 'exclamation-triangle',
+                    warning: 'exclamation-circle',
+                    info: 'info-circle'
+                };
+                
+                toast.setAttribute('data-type', type);
+                toast.className = `${colors[type]} border-l-4 text-white px-5 py-3.5 rounded-lg shadow-lg toast font-medium flex items-center gap-3 min-w-[300px]`;
+                toast.innerHTML = `
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-${icons[type]} text-lg"></i>
+                    </div>
+                    <div class="flex-1">${message}</div>
+                `;
+                container.appendChild(toast);
+                setTimeout(() => toast.remove(), 4000);
+            }
+
+            async loadClusters() {
+                try {
+                    const response = await fetch('/api/clusters');
+                    const data = await response.json();
+                    this.clusters = data.clusters;
+                    this.updateStats(data);
+                    this.renderClusters(data.clusters);
+                    this.renderChart(data.clusters);
+                } catch (error) {
+                    console.error('Error loading clusters:', error);
+                }
+            }
+
+            updateStats(data) {
+                document.getElementById('totalComments').textContent = data.total_comments;
+                document.getElementById('totalClusters').textContent = data.total_clusters;
+                document.getElementById('avgClusterSize').textContent = 
+                    data.total_clusters > 0 ? (data.total_comments / data.total_clusters).toFixed(1) : '0';
+            }
+
+            filterClusters(query) {
+                const cards = document.querySelectorAll('[data-cluster]');
+                cards.forEach(card => {
+                    const text = card.textContent.toLowerCase();
+                    card.style.display = text.includes(query.toLowerCase()) ? 'block' : 'none';
+                });
+            }
+
+            sortClusters(order) {
+                const container = document.getElementById('clustersContainer');
+                const cards = Array.from(document.querySelectorAll('[data-cluster]'));
+                
+                cards.sort((a, b) => {
+                    const sizeA = parseInt(a.dataset.size);
+                    const sizeB = parseInt(b.dataset.size);
+                    return order === 'size' ? sizeB - sizeA : 0;
+                });
+
+                cards.forEach(card => container.appendChild(card));
+            }
+
+            renderClusters(clusters) {
+                const container = document.getElementById('clustersContainer');
+
+                if (clusters.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center text-slate-400 dark:text-slate-500 py-16">
+                            <div class="w-16 h-16 bg-slate-100 dark:bg-dark-border rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-inbox text-3xl text-slate-300 dark:text-slate-600"></i>
+                            </div>
+                            <p class="text-base font-medium">No clusters yet</p>
+                            <p class="text-sm mt-1">Start adding comments to see semantic groupings</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = clusters.map((cluster, idx) => {
+                    const density = (cluster.comment_count / Math.max(...clusters.map(c => c.comment_count))) * 100;
+                    const colors = [
+                        'from-primary-500 to-indigo-600',
+                        'from-indigo-500 to-purple-600',
+                        'from-purple-500 to-pink-600',
+                        'from-pink-500 to-rose-600',
+                        'from-emerald-500 to-teal-600',
+                        'from-blue-500 to-cyan-600'
+                    ];
+                    const colorClass = colors[idx % colors.length];
+                    
+                    return `
+                        <div class="bg-slate-50 dark:bg-dark-bg rounded-lg border border-slate-200 dark:border-dark-border 
+                                    hover:border-primary-400 dark:hover:border-primary-500 transition-all card-hover fade-in" 
+                             data-cluster="${idx}" data-size="${cluster.comment_count}">
+                            <button type="button" 
+                                    class="flex items-center justify-between w-full p-5 focus:outline-none group" 
+                                    onclick="this.closest('[data-cluster]').querySelector('[data-content]').classList.toggle('hidden')">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-lg bg-gradient-to-br ${colorClass} 
+                                                flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                                        ${idx + 1}
+                                    </div>
+                                    <div class="text-left">
+                                        <div class="font-semibold text-slate-800 dark:text-slate-100 mb-1">
+                                            Cluster ${idx + 1}
+                                        </div>
+                                        <div class="text-sm text-slate-600 dark:text-slate-400 line-clamp-1">
+                                            ${cluster.representative_text.substring(0, 80)}${cluster.representative_text.length > 80 ? '...' : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <div class="text-right">
+                                        <div class="text-2xl font-bold text-slate-800 dark:text-slate-100">
+                                            ${cluster.comment_count}
+                                        </div>
+                                        <div class="text-xs text-slate-500 dark:text-slate-400">
+                                            ${cluster.comment_count === 1 ? 'Comment' : 'Comments'}
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-chevron-down text-slate-400 group-hover:text-primary-500 transition transform group-hover:translate-y-0.5"></i>
+                                </div>
+                            </button>
+                            
+                            <div class="px-5 pb-4">
+                                <div class="w-full bg-slate-200 dark:bg-dark-border rounded-full h-2 overflow-hidden">
+                                    <div class="bg-gradient-to-r ${colorClass} h-full rounded-full transition-all duration-500" 
+                                         style="width: ${density}%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="hidden px-5 pb-5 space-y-2" data-content>
+                                <div class="border-t border-slate-200 dark:border-dark-border pt-4">
+                                    ${cluster.comments.map(comment => `
+                                        <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border 
+                                                    rounded-lg p-4 mb-3 hover:shadow-sm transition">
+                                            <div class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mb-3">
+                                                ${comment.text}
+                                            </div>
+                                            <div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                                                <span class="flex items-center gap-1.5">
+                                                    <i class="fas fa-clock"></i>
+                                                    ${new Date(comment.timestamp).toLocaleString()}
+                                                </span>
+                                                ${comment.user_id ? `
+                                                    <span class="flex items-center gap-1.5">
+                                                        <i class="fas fa-user"></i>
+                                                        ${comment.user_id}
+                                                    </span>
+                                                ` : ''}
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            renderChart(clusters) {
+                const ctx = document.getElementById('clusterChart').getContext('2d');
+                const labels = clusters.map((c, i) => `Cluster ${i + 1}`);
+                const data = clusters.map(c => c.comment_count);
+                
+                // Professional color palette
+                const baseColors = [
+                    'rgba(99, 102, 241, 0.8)',   // primary-500
+                    'rgba(79, 70, 229, 0.8)',    // primary-600
+                    'rgba(139, 92, 246, 0.8)',   // purple-500
+                    'rgba(168, 85, 247, 0.8)',   // purple-600
+                    'rgba(236, 72, 153, 0.8)',   // pink-500
+                    'rgba(16, 185, 129, 0.8)',   // emerald-500
+                ];
+                
+                const borderColors = [
+                    'rgba(99, 102, 241, 1)',
+                    'rgba(79, 70, 229, 1)',
+                    'rgba(139, 92, 246, 1)',
+                    'rgba(168, 85, 247, 1)',
+                    'rgba(236, 72, 153, 1)',
+                    'rgba(16, 185, 129, 1)',
+                ];
+                
+                const colors = clusters.map((_, i) => baseColors[i % baseColors.length]);
+                const borders = clusters.map((_, i) => borderColors[i % borderColors.length]);
+
+                if (this.chart) this.chart.destroy();
+                this.chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Comments per Cluster',
+                            data,
+                            backgroundColor: colors,
+                            borderColor: borders,
+                            borderWidth: 2,
+                            borderRadius: 6,
+                            borderSkipped: false,
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { 
+                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                padding: 12,
+                                titleColor: '#fff',
+                                bodyColor: '#cbd5e1',
+                                borderColor: '#475569',
+                                borderWidth: 1,
+                                callbacks: { 
+                                    label: (ctx) => ` ${ctx.parsed.y} ${ctx.parsed.y === 1 ? 'comment' : 'comments'}` 
+                                } 
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { 
+                                    display: false 
+                                },
+                                ticks: {
+                                    color: '#64748b',
+                                    font: { size: 11 }
+                                }
+                            },
+                            y: { 
+                                beginAtZero: true, 
+                                ticks: { 
+                                    stepSize: 1,
+                                    color: '#64748b',
+                                    font: { size: 11 }
+                                }, 
+                                grid: { 
+                                    color: 'rgba(148, 163, 184, 0.1)',
+                                    drawBorder: false 
+                                } 
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                    }
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new AdvancedClusteringApp();
+        });
+    </script>
+</body>
+</html>
